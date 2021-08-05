@@ -3,6 +3,113 @@
 
 body {
   color: white;
-  background-color: #313131;
+  background-color: #101010;
   font-family: 'Roboto', sans-serif;
+}
+
+.btn {
+  height: 2em;
+  width: 8em;
+}
+
+.btn:hover {
+  cursor: pointer;
+}
+
+.btn--o {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn--x {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.container__content {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  width: 50em;
+}
+
+.content__game {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 25em;
+}
+
+.game__board {
+  display: grid;
+  background-color: black;
+  gap: 0.3em;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  height: 20em;
+  width: 20em;
+}
+
+.game__player {
+  display: flex;
+}
+
+.board__card {
+  background-color: white;
+}
+
+.board__card:hover {
+  cursor: pointer;
+}
+
+.player__o {
+  height: auto;
+  width: 1em;
+}
+
+.player__x {
+  height: auto;
+  width: 1em;
+}
+
+.content__information {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 25em;
+  width: 25em;
+}
+
+.information__title {
+  align-self: flex-start;
+}
+
+.information__description {
+  text-align: right;
+}
+
+.information__tags {
+  color: white;
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+
+.tags__github {
+  height: auto;
+  width: 3em;
+}
+
+.tags__gitlogo {
+  height: auto;
+  width: 1.5em;
 }

@@ -1,16 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css" type="text/css">
-    <title class="title">t-icacoe</title>
-</head>
-<body>
-    <div class="t-icacoe">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/styles.css" type="text/css" />
+    <title class="title">t-icacoe eocaci-t</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="container__content">
+        <div class="content__game">
+          <div class="game__board">
+            <div class="board__card" data-row="0" data-column="0"></div>
+            <div class="board__card" data-row="0" data-column="1"></div>
+            <div class="board__card" data-row="0" data-column="2"></div>
+            <div class="board__card" data-row="1" data-column="0"></div>
+            <div class="board__card" data-row="1" data-column="1"></div>
+            <div class="board__card" data-row="1" data-column="2"></div>
+            <div class="board__card" data-row="2" data-column="0"></div>
+            <div class="board__card" data-row="2" data-column="1"></div>
+            <div class="board__card" data-row="2" data-column="2"></div>
+          </div>
+          <div class="game__player">
+            <button class="btn btn--o">
+              <span class="player__o">O</span
+              ><span class="player__score">O</span>
+            </button>
+            <button class="btn btn--x">
+              <span class="player__x">X</span
+              ><span class="player__score">X</span>
+            </button>
+          </div>
+          <div class="game__restart">
+            <button class="btn btn-restart">Restart Game</button>
+          </div>
+        </div>
+        <div class="content__information">
+          <h1 class="information__title">t-icacoe eocaci-t</h1>
+          <p class="information__description">
+            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolore,
+            iste aut ipsa excepturi, non nam natus alias, incidunt soluta
+            quaerat itaque veritatis neque dolor amet!
+          </p>
+          <a href="https://github.com/oavqt" class="information__tags">
+            <img src="images/github.png" alt="" class="tags__github" />
+            <img src="images/gitlogo.png" alt="" class="tags__gitlogo" />
+            <span>Oav</span>
+          </a>
+        </div>
+      </div>
     </div>
-</body>
-<script src="scripts/index.js"></script>
-<script src="scripts/scripts.js"></script>
+  </body>
+  <script src="scripts/scripts.js"></script>
 </html>
