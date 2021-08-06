@@ -77,7 +77,7 @@ body {
   width: 16.5em;
 }
 
-.board__card {
+.board__square {
   align-items: center;
   background-color: white;
   color: black;
