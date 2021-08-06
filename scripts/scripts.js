@@ -31,7 +31,7 @@ const pubsub = (() => {
 })();
 
 const display = (() => {
-  let person = 'O';
+  let player = 'O';
 
   //cache DOM
   const board = document.querySelector('.board__grid');
@@ -42,13 +42,27 @@ const display = (() => {
   const scores = [...document.querySelectorAll('.player__score')];
   const btns = [...document.querySelectorAll('.btn')];
   const message = document.querySelector('.board__message');
+  const select = document.querySelector('.information__select');
 
   //Functions
   function square() {
     if (this.textContent !== '') {
       this.disabled;
     } else {
-      (this.textContent = person), this.classList.add('board__square--active');
+      (this.textContent = player), this.classList.add('board__square--active');
+    }
+
+    if (select.value === 'pvp') {
+      btns[0].disabled = true;
+      btns[1].disabled = true;
+
+      if (player === 'O') {
+        player = 'X';
+        message.textContent = 'X turn';
+      } else {
+        player = 'O';
+        message.textContent = 'O turn';
+      }
     }
 
     pubsub.publish('board', squares);
@@ -56,35 +70,34 @@ const display = (() => {
 
   function btn() {
     if (this.className === 'btn btn--o') {
-      person = 'O';
+      player = 'O';
 
       btns[0].disabled = true;
       btns[1].disabled = true;
 
       message.textContent = '';
     } else if (this.className === 'btn btn--x') {
-      person = 'X';
+      player = 'X';
 
       btns[0].disabled = true;
       btns[1].disabled = true;
 
       message.textContent = '';
     } else {
-      person = 'O';
-
-      btns[0].disabled = false;
-      btns[1].disabled = false;
+      board.classList.remove('board__grid--active');
+      board.classList.add('board__grid--alt');
+      result.classList.remove('board__result--active');
 
       squares.forEach((item) => {
         item.textContent = '';
+        item.classList.remove('board__square--active');
       });
 
-      message.textContent = 'Start game or select player';
-    }
-
-    if (this.className === 'btn btn--restart') {
-      board.classList.remove('board__grid--active');
-      result.classList.remove('board__result--active');
+      if (select.value === 'pvp') {
+        message.textContent = 'O turn';
+      } else {
+        message.textContent = 'Start game or select player';
+      }
 
       pubsub.publish('restart', true);
     }
@@ -111,6 +124,14 @@ const display = (() => {
     scores[1].textContent = count[1];
   }
 
+  function opponent() {
+    if (this.value === 'pvp') {
+      message.textContent = 'O turn';
+    } else {
+      message.textContent = 'Start game or select player';
+    }
+  }
+
   //Events
   squares.forEach((item) => {
     item.addEventListener('click', square);
@@ -119,6 +140,8 @@ const display = (() => {
   btns.forEach((item) => {
     item.addEventListener('click', btn);
   });
+
+  select.addEventListener('change', opponent);
 
   pubsub.subscribe('end', end);
   pubsub.subscribe('score', score);
