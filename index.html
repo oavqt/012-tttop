@@ -10,22 +10,44 @@
   <body>
     <div class="container">
       <div class="container__content">
-        <div class="content__game">
-          <div class="game__board">
-            <div class="board__square" data-row="0" data-column="0"></div>
-            <div class="board__square" data-row="0" data-column="1"></div>
-            <div class="board__square" data-row="0" data-column="2"></div>
-            <div class="board__square" data-row="1" data-column="0"></div>
-            <div class="board__square" data-row="1" data-column="1"></div>
-            <div class="board__square" data-row="1" data-column="2"></div>
-            <div class="board__square" data-row="2" data-column="0"></div>
-            <div class="board__square" data-row="2" data-column="1"></div>
-            <div class="board__square" data-row="2" data-column="2"></div>
+        <div class="content__board">
+          <div class="board__grid">
+            <div>
+              <span class="board__square" data-row="0" data-column="0"></span>
+            </div>
+            <div>
+              <span class="board__square" data-row="0" data-column="1"></span>
+            </div>
+            <div>
+              <span class="board__square" data-row="0" data-column="2"></span>
+            </div>
+            <div>
+              <span class="board__square" data-row="1" data-column="0"></span>
+            </div>
+            <div>
+              <span class="board__square" data-row="1" data-column="1"></span>
+            </div>
+            <div>
+              <span class="board__square" data-row="1" data-column="2"></span>
+            </div>
+            <div>
+              <span class="board__square" data-row="2" data-column="0"></span>
+            </div>
+            <div>
+              <span class="board__square" data-row="2" data-column="1"></span>
+            </div>
+            <div>
+              <span class="board__square" data-row="2" data-column="2"></span>
+            </div>
           </div>
-          <div class="game__message">
-            <span class="message__current">Start game or select player</span>
+          <div class="board__result">
+            <span class="result__player">OX</span>
+            <span class="result__message">DRAW!</span>
           </div>
-          <div class="game__player">
+          <div class="board__text">
+            <span class="board__message">Start game or select player</span>
+          </div>
+          <div class="board__player">
             <button class="btn btn--o">
               <span class="player__o">O</span
               ><span class="player__score">5</span>
@@ -35,7 +57,7 @@
               ><span class="player__score">2</span>
             </button>
           </div>
-          <div class="game__restart">
+          <div class="board__restart">
             <button class="btn btn--restart">Restart Game</button>
           </div>
         </div>
