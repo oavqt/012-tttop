@@ -81,6 +81,13 @@ const display = (() => {
 
       message.textContent = 'Start game or select player';
     }
+
+    if (this.className === 'btn btn--restart') {
+      board.classList.remove('board__grid--active');
+      result.classList.remove('board__result--active');
+
+      pubsub.publish('restart', true);
+    }
   }
 
   function end(data) {
@@ -99,6 +106,11 @@ const display = (() => {
     }
   }
 
+  function score(count) {
+    scores[0].textContent = count[0];
+    scores[1].textContent = count[1];
+  }
+
   //Events
   squares.forEach((item) => {
     item.addEventListener('click', square);
@@ -109,6 +121,7 @@ const display = (() => {
   });
 
   pubsub.subscribe('end', end);
+  pubsub.subscribe('score', score);
 })();
 
 const board = (() => {
@@ -119,6 +132,8 @@ const board = (() => {
   ];
 
   let winner = '';
+  let countO = 0;
+  let countX = 0;
 
   //Functions
   function populate(data) {
@@ -189,6 +204,12 @@ const board = (() => {
     }
 
     if (winner !== '' || isBoardFull() === true) {
+      if (winner === 'O') {
+        countO++;
+      } else {
+        countX++;
+      }
+      pubsub.publish('score', [countO, countX]);
       pubsub.publish('end', winner);
     }
   }
@@ -205,8 +226,20 @@ const board = (() => {
     return check;
   }
 
+  function restart(data) {
+    if (data === true) {
+      board = [
+        ['[0][0]', '[0][1]', '[0][2]'],
+        ['[1][0]', '[1][1]', '[1][2]'],
+        ['[2][0]', '[2][1]', '[2][2]'],
+      ];
+
+      winner = '';
+    }
+  }
+
   //Events
   pubsub.subscribe('board', populate);
+  pubsub.subscribe('restart', restart);
 })();
-
 //
