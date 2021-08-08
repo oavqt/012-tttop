@@ -32,6 +32,7 @@ const pubsub = (() => {
 
 const display = (() => {
   let player = 'O';
+  let vs = 'computer';
 
   //cache DOM
   const board = document.querySelector('.board__grid');
@@ -45,27 +46,30 @@ const display = (() => {
   const select = document.querySelector('.information__select');
 
   //Functions
+
   function square() {
     if (this.textContent !== '') {
-      this.disabled;
+      return;
     } else {
-      (this.textContent = player), this.classList.add('board__square--active');
-    }
+      this.textContent = player;
+      this.classList.add('board__square--active');
 
-    if (select.value === 'pvp') {
-      btns[0].disabled = true;
-      btns[1].disabled = true;
+      message.textContent = '';
 
-      if (player === 'O') {
-        player = 'X';
-        message.textContent = 'X turn';
-      } else {
-        player = 'O';
-        message.textContent = 'O turn';
+      pubsub.publish('board', squares);
+
+      if (select.value === 'player') {
+        if (player === 'O') {
+          player = 'X';
+
+          message.textContent = 'X turn';
+        } else {
+          player = 'O';
+
+          message.textContent = 'O turn';
+        }
       }
     }
-
-    pubsub.publish('board', squares);
   }
 
   function btn() {
@@ -76,6 +80,9 @@ const display = (() => {
       btns[1].disabled = true;
 
       message.textContent = '';
+
+      addSquareEventAndReset();
+      pubsub.publish('restart', true);
     } else if (this.className === 'btn btn--x') {
       player = 'X';
 
@@ -83,39 +90,37 @@ const display = (() => {
       btns[1].disabled = true;
 
       message.textContent = '';
-    } else {
+
+      addSquareEventAndReset();
+      pubsub.publish('restart', true);
+      pubsub.publish('player', player);
+      pubsub.publish('setComputetToFirst', true);
+    } else if (
+      this.className === 'btn btn--restart' ||
+      this.className === 'board__result board__result--active'
+    ) {
+      player = 'O';
+
+      btns[0].disabled = false;
+      btns[1].disabled = false;
+
       board.classList.remove('board__grid--active');
-      board.classList.add('board__grid--alt');
+
       result.classList.remove('board__result--active');
 
-      squares.forEach((item) => {
-        item.textContent = '';
-        item.classList.remove('board__square--active');
-      });
+      message.textContent = 'Restarting';
 
-      if (select.value === 'pvp') {
-        message.textContent = 'O turn';
-      } else {
+      setTimeout(() => {
+        board.classList.add('board__grid--alt');
+
+        addSquareEventAndReset();
+
         message.textContent = 'Start game or select player';
-      }
+      }, 1000);
+
+      board.classList.remove('board__grid--alt');
 
       pubsub.publish('restart', true);
-    }
-  }
-
-  function end(data) {
-    board.classList.add('board__grid--active');
-    result.classList.add('board__result--active');
-
-    if (data === 'O') {
-      resultPlayer.textContent = data;
-      resultText.textContent = 'Winner!';
-    } else if (data === 'X') {
-      resultPlayer.textContent = data;
-      resultText.textContent = 'Winner!';
-    } else {
-      resultPlayer.textContent = 'OX';
-      resultText.textContent = 'Draw!';
     }
   }
 
@@ -124,27 +129,103 @@ const display = (() => {
     scores[1].textContent = count[1];
   }
 
-  function opponent() {
-    if (this.value === 'pvp') {
-      message.textContent = 'O turn';
+  function vSComputerOrPlayer() {
+    player = 'O';
+
+    if (this.value === 'player') {
+      vs = 'player';
     } else {
-      message.textContent = 'Start game or select player';
+      vs = 'computer';
+    }
+
+    addSquareEventAndReset();
+    pubsub.publish('vs', vs);
+    pubsub.publish('restart', true);
+  }
+
+  function showComputerChoice(position) {
+    for (let u = 0; u < squares.length; u++) {
+      if (
+        +squares[u].dataset['row'] === position[0] &&
+        +squares[u].dataset['column'] === position[1]
+      ) {
+        removeSquareEvent();
+
+        setTimeout(() => {
+          squares[u].classList.add('board__square--active');
+
+          if (player === 'X') {
+            squares[u].textContent = 'O';
+          } else {
+            squares[u].textContent = 'X';
+          }
+
+          addSquareEvent();
+        }, 1000);
+      }
     }
   }
 
+  function endTheGame(winner) {
+    removeSquareEvent();
+
+    btns[2].disabled = true;
+
+    if (winner === 'O') {
+      resultPlayer.textContent = winner;
+      resultText.textContent = 'Winner!';
+    } else if (winner === 'X') {
+      resultPlayer.textContent = winner;
+      resultText.textContent = 'Winner!';
+    } else {
+      resultPlayer.textContent = 'OX';
+      resultText.textContent = 'Draw!';
+    }
+
+    setTimeout(() => {
+      board.classList.add('board__grid--active');
+      result.classList.add('board__result--active');
+
+      message.textContent = 'Click to restart';
+
+      btns[2].disabled = false;
+    }, 1000);
+  }
+
   //Events
-  squares.forEach((item) => {
-    item.addEventListener('click', square);
-  });
+  function removeSquareEvent() {
+    squares.forEach((item) => {
+      item.removeEventListener('click', square);
+    });
+  }
+
+  function addSquareEvent() {
+    squares.forEach((item) => {
+      item.addEventListener('click', square);
+    });
+  }
+
+  function addSquareEventAndReset() {
+    squares.forEach((item) => {
+      item.textContent = '';
+      item.classList.remove('board__square--active');
+      item.addEventListener('click', square);
+    });
+  }
+
+  addSquareEvent();
 
   btns.forEach((item) => {
     item.addEventListener('click', btn);
   });
 
-  select.addEventListener('change', opponent);
+  select.addEventListener('change', vSComputerOrPlayer);
 
-  pubsub.subscribe('end', end);
+  result.addEventListener('click', btn);
+
+  pubsub.subscribe('endTheGame', endTheGame);
   pubsub.subscribe('score', score);
+  pubsub.subscribe('showComputerChoice', showComputerChoice);
 })();
 
 const board = (() => {
@@ -155,22 +236,33 @@ const board = (() => {
   ];
 
   let winner = '';
-  let countO = 0;
-  let countX = 0;
+  let player0Score = 0;
+  let playerXScore = 0;
+  let stop = 'no';
 
   //Functions
-  function populate(data) {
-    for (let u = 0; u < data.length; u++) {
-      if (data[u].textContent !== '') {
-        board[data[u].dataset['row']][data[u].dataset['column']] =
-          data[u].textContent;
+  function insertXOToBoard(xOrO) {
+    for (let u = 0; u < xOrO.length; u++) {
+      if (xOrO[u].textContent !== '') {
+        board[xOrO[u].dataset['row']][xOrO[u].dataset['column']] =
+          xOrO[u].textContent;
       }
     }
 
-    checkBoard();
+    scanTheBoard();
+
+    if (stop === 'no') {
+      pubsub.publish('startComputer', board);
+    }
   }
 
-  function checkBoard() {
+  function setComputetToFirst(tOrF) {
+    if (tOrF === true) {
+      pubsub.publish('startComputer', board);
+    }
+  }
+
+  function scanTheBoard() {
     //Horizontal
     if (board[0][0] === board[0][1] && board[0][0] === board[0][2]) {
       if (board[0][0] === 'O') {
@@ -226,18 +318,23 @@ const board = (() => {
       }
     }
 
-    if (winner !== '' || isBoardFull() === true) {
+    if (winner !== '' || boardIsFilled() === true) {
+      stop = 'yes';
+
       if (winner === 'O') {
-        countO++;
-      } else {
-        countX++;
+        player0Score++;
+      } else if (winner === 'X') {
+        playerXScore++;
       }
-      pubsub.publish('score', [countO, countX]);
-      pubsub.publish('end', winner);
+
+      pubsub.publish('score', [player0Score, playerXScore]);
+      pubsub.publish('endTheGame', winner);
+    } else {
+      stop = 'no';
     }
   }
 
-  function isBoardFull() {
+  function boardIsFilled() {
     let check = true;
     for (let row = 0; row < board.length; row++) {
       for (let column = 0; column < board[row].length; column++) {
@@ -249,8 +346,8 @@ const board = (() => {
     return check;
   }
 
-  function restart(data) {
-    if (data === true) {
+  function restart(tOrF) {
+    if (tOrF === true) {
       board = [
         ['[0][0]', '[0][1]', '[0][2]'],
         ['[1][0]', '[1][1]', '[1][2]'],
@@ -262,7 +359,64 @@ const board = (() => {
   }
 
   //Events
-  pubsub.subscribe('board', populate);
+  pubsub.subscribe('board', insertXOToBoard);
   pubsub.subscribe('restart', restart);
+  pubsub.subscribe('computerBoardCheck', scanTheBoard);
+  pubsub.subscribe('setComputetToFirst', setComputetToFirst);
+
+  return board;
 })();
+
+const computer = (() => {
+  let type = 'computer';
+  let computer = 'X';
+
+  //Functions
+  function vs(pOrC) {
+    if (pOrC === 'player') {
+      type = 'player';
+    } else {
+      type = 'computer';
+    }
+  }
+
+  function changeToO(xOrO) {
+    if (xOrO === 'X') {
+      computer = 'O';
+    }
+  }
+
+  function random(board) {
+    if (type === 'computer') {
+      for (let row = 0; row < board.length; row++) {
+        for (let column = 0; column < board[row].length; column++) {
+          if (board[row][column].length > 1) {
+            while (true) {
+              let rows = Math.floor(Math.random() * (3 - 0) + 0);
+              let columns = Math.floor(Math.random() * (3 - 0) + 0);
+
+              if (
+                board[rows][columns] !== 'O' &&
+                board[rows][columns] !== 'X'
+              ) {
+                board[rows][columns] = computer;
+
+                pubsub.publish('showComputerChoice', [rows, columns]);
+                pubsub.publish('computerBoardCheck', board);
+
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  //Events
+  pubsub.subscribe('vs', vs);
+  pubsub.subscribe('startComputer', random);
+  pubsub.subscribe('player', changeToO);
+})();
+
 //

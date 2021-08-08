@@ -87,7 +87,7 @@ body {
 }
 
 .board__grid--alt {
-  animation: fade-in 3s;
+  animation: fade-in 1s;
 }
 
 .board__square {
@@ -112,7 +112,7 @@ body {
 
 .board__result {
   align-items: center;
-  animation: fade-in 3s;
+  animation: fade-in 1s;
   display: none;
   flex-direction: column;
   height: 20em;
@@ -122,6 +122,10 @@ body {
 
 .board__result--active {
   display: flex;
+}
+
+.board__result--active:hover {
+  cursor: pointer;
 }
 
 .result__player {
