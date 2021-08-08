@@ -62,9 +62,13 @@ const display = (() => {
         if (player === 'O') {
           player = 'X';
 
+          addActiveOnXRemoveO();
+
           message.textContent = 'X turn';
         } else {
           player = 'O';
+
+          addActiveOnORemoveX();
 
           message.textContent = 'O turn';
         }
@@ -76,8 +80,9 @@ const display = (() => {
     if (this.className === 'btn btn--o') {
       player = 'O';
 
-      btns[0].disabled = true;
-      btns[1].disabled = true;
+      xAndOEventRemove();
+
+      addActiveOnORemoveX();
 
       message.textContent = '';
 
@@ -86,8 +91,9 @@ const display = (() => {
     } else if (this.className === 'btn btn--x') {
       player = 'X';
 
-      btns[0].disabled = true;
-      btns[1].disabled = true;
+      xAndOEventRemove();
+
+      addActiveOnXRemoveO();
 
       message.textContent = '';
 
@@ -101,8 +107,8 @@ const display = (() => {
     ) {
       player = 'O';
 
-      btns[0].disabled = false;
-      btns[1].disabled = false;
+      btns[0].classList.remove('btn--o--active');
+      btns[1].classList.remove('btn--x--active');
 
       board.classList.remove('board__grid--active');
 
@@ -116,6 +122,10 @@ const display = (() => {
         addSquareEventAndReset();
 
         message.textContent = 'Start game or select player';
+
+        xAndOEventAdd();
+
+        btns[0].classList.add('btn--o--active');
       }, 1000);
 
       board.classList.remove('board__grid--alt');
@@ -132,8 +142,12 @@ const display = (() => {
   function vSComputerOrPlayer() {
     player = 'O';
 
+    xAndOEventAdd();
+
     if (this.value === 'player') {
       vs = 'player';
+
+      btns[0].classList.add('btn--o--active');
     } else {
       vs = 'computer';
     }
@@ -149,6 +163,12 @@ const display = (() => {
         +squares[u].dataset['row'] === position[0] &&
         +squares[u].dataset['column'] === position[1]
       ) {
+        if (player === 'X') {
+          addActiveOnORemoveX();
+        } else {
+          addActiveOnXRemoveO();
+        }
+
         removeSquareEvent();
 
         setTimeout(() => {
@@ -160,6 +180,12 @@ const display = (() => {
             squares[u].textContent = 'X';
           }
 
+          if (player === 'X') {
+            addActiveOnXRemoveO();
+          } else {
+            addActiveOnORemoveX();
+          }
+
           addSquareEvent();
         }, 1000);
       }
@@ -168,8 +194,6 @@ const display = (() => {
 
   function endTheGame(winner) {
     removeSquareEvent();
-
-    btns[2].disabled = true;
 
     if (winner === 'O') {
       resultPlayer.textContent = winner;
@@ -187,8 +211,6 @@ const display = (() => {
       result.classList.add('board__result--active');
 
       message.textContent = 'Click to restart';
-
-      btns[2].disabled = false;
     }, 1000);
   }
 
@@ -213,7 +235,29 @@ const display = (() => {
     });
   }
 
+  function addActiveOnORemoveX() {
+    btns[0].classList.add('btn--o--active');
+    btns[1].classList.remove('btn--x--active');
+  }
+
+  function addActiveOnXRemoveO() {
+    btns[1].classList.add('btn--x--active');
+    btns[0].classList.remove('btn--o--active');
+  }
+
+  function xAndOEventRemove() {
+    btns[0].removeEventListener('click', btn);
+    btns[1].removeEventListener('click', btn);
+  }
+
+  function xAndOEventAdd() {
+    btns[0].addEventListener('click', btn);
+    btns[1].addEventListener('click', btn);
+  }
+
   addSquareEvent();
+
+  btns[0].classList.add('btn--o--active');
 
   btns.forEach((item) => {
     item.addEventListener('click', btn);

@@ -17,16 +17,29 @@ body {
   }
 }
 
+@keyframes color {
+  from {
+    background-color: white;
+  }
+  to {
+    background-color: #58a6ff;
+  }
+}
+
+@keyframes color-alt {
+  from {
+    background-color: white;
+  }
+  to {
+    background-color: #ff587f;
+  }
+}
+
 .btn {
   background-color: white;
   border: none;
   height: 2em;
   width: 8em;
-}
-
-.btn:disabled {
-  color: black;
-  background-color: white;
 }
 
 .btn:hover {
@@ -43,6 +56,16 @@ body {
   align-items: center;
   display: flex;
   justify-content: space-between;
+}
+
+.btn--o--active {
+  animation: color 1s;
+  background-color: #58a6ff;
+}
+
+.btn--x--active {
+  animation: color-alt 1s;
+  background-color: #ff587f;
 }
 
 .container {
@@ -185,6 +208,10 @@ body {
   font-size: 1.1rem;
   margin-bottom: auto;
   text-decoration: none;
+}
+
+.information__tags:hover {
+  color: #58a6ff;
 }
 
 .tags__github {
