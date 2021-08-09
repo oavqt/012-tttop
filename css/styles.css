@@ -61,11 +61,18 @@ body {
 .btn--o--active {
   animation: color 1s;
   background-color: #58a6ff;
+  color: white;
 }
 
 .btn--x--active {
   animation: color-alt 1s;
   background-color: #ff587f;
+  color: white;
+}
+
+.btn--restart {
+  background-color: transparent;
+  color: white;
 }
 
 .container {
@@ -73,6 +80,7 @@ body {
   display: flex;
   justify-content: center;
   height: 100vh;
+  padding: 1em;
   width: 100vw;
 }
 
@@ -195,6 +203,10 @@ body {
   outline: none;
 }
 
+.information__select:hover {
+  cursor: pointer;
+}
+
 .information__title {
   align-self: flex-start;
 }
@@ -210,10 +222,6 @@ body {
   text-decoration: none;
 }
 
-.information__tags:hover {
-  color: #58a6ff;
-}
-
 .tags__github {
   height: auto;
   width: 3em;
@@ -222,4 +230,55 @@ body {
 .tags__gitlogo {
   height: auto;
   width: 1.5em;
+}
+
+/* Mobile */
+
+@media screen and (max-height: 868px) and (max-width: 868px) {
+  .container__content {
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .content__board {
+    order: 2;
+  }
+
+  .content__information {
+    flex-direction: row;
+    height: 5%;
+    justify-content: space-around;
+    order: 1;
+    top: 0;
+    width: 20em;
+  }
+
+  .information__select {
+    align-self: center;
+    margin: 0;
+  }
+
+  .information__title {
+    display: none;
+  }
+
+  .information__description {
+    display: none;
+  }
+
+  .information__tags {
+    margin: 0;
+  }
+}
+
+@media screen and (max-height: 568px) {
+  .container {
+    height: 100%;
+  }
+
+  .container__content {
+    height: 100%;
+  }
 }

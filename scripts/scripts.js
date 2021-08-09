@@ -46,7 +46,6 @@ const display = (() => {
   const select = document.querySelector('.information__select');
 
   //Functions
-
   function square() {
     if (this.textContent !== '') {
       return;
@@ -84,7 +83,7 @@ const display = (() => {
 
       addActiveOnORemoveX();
 
-      message.textContent = '';
+      message.textContent = 'O turn';
 
       addSquareEventAndReset();
       pubsub.publish('restart', true);
@@ -95,7 +94,7 @@ const display = (() => {
 
       addActiveOnXRemoveO();
 
-      message.textContent = '';
+      message.textContent = 'X turn';
 
       addSquareEventAndReset();
       pubsub.publish('restart', true);
@@ -142,17 +141,18 @@ const display = (() => {
   function vSComputerOrPlayer() {
     player = 'O';
 
-    xAndOEventAdd();
-
     if (this.value === 'player') {
       vs = 'player';
-
-      btns[0].classList.add('btn--o--active');
     } else {
       vs = 'computer';
     }
 
+    addActiveOnORemoveX();
+    xAndOEventAdd();
     addSquareEventAndReset();
+
+    message.textContent = 'Start game or select player';
+
     pubsub.publish('vs', vs);
     pubsub.publish('restart', true);
   }
@@ -210,7 +210,7 @@ const display = (() => {
       board.classList.add('board__grid--active');
       result.classList.add('board__result--active');
 
-      message.textContent = 'Click to restart';
+      message.textContent = '';
     }, 1000);
   }
 
@@ -238,11 +238,13 @@ const display = (() => {
   function addActiveOnORemoveX() {
     btns[0].classList.add('btn--o--active');
     btns[1].classList.remove('btn--x--active');
+    message.textContent = 'O turn';
   }
 
   function addActiveOnXRemoveO() {
     btns[1].classList.add('btn--x--active');
     btns[0].classList.remove('btn--o--active');
+    message.textContent = 'X turn';
   }
 
   function xAndOEventRemove() {

@@ -141,7 +141,7 @@ legendTheGame {
   display: table;
   max-width: 100%;
   padding: 0;
-  white-space: normal;
+  white-space: mobileScreen;
 }
 
 progress {
