@@ -32,6 +32,9 @@ const pubsub = (() => {
 
 const display = (() => {
   let player = 'O';
+  let seeBoardPlayer = true;
+  let player0Score = 0;
+  let playerXScore = 0;
   let vs = 'computer';
 
   //cache DOM
@@ -56,6 +59,7 @@ const display = (() => {
       message.textContent = '';
 
       pubsub.publish('board', squares);
+      pubsub.publish('seeBoardPlayer', seeBoardPlayer);
 
       if (select.value === 'player') {
         if (player === 'O') {
@@ -97,9 +101,11 @@ const display = (() => {
       message.textContent = 'X turn';
 
       addSquareEventAndReset();
+
       pubsub.publish('restart', true);
       pubsub.publish('player', player);
-      pubsub.publish('setComputetToFirst', true);
+      pubsub.publish('setComputerToFirst', true);
+      pubsub.publish('isComputerFirst', true);
     } else if (
       this.className === 'btn btn--restart' ||
       this.className === 'board__result board__result--active'
@@ -129,13 +135,10 @@ const display = (() => {
 
       board.classList.remove('board__grid--alt');
 
+      pubsub.publish('player', player);
+      pubsub.publish('setComputerToFirst', false);
       pubsub.publish('restart', true);
     }
-  }
-
-  function score(count) {
-    scores[0].textContent = count[0];
-    scores[1].textContent = count[1];
   }
 
   function vSComputerOrPlayer() {
@@ -143,8 +146,10 @@ const display = (() => {
 
     if (this.value === 'player') {
       vs = 'player';
+    } else if (this.value === 'easy') {
+      vs = 'easy';
     } else {
-      vs = 'computer';
+      vs = 'legendary';
     }
 
     addActiveOnORemoveX();
@@ -198,9 +203,15 @@ const display = (() => {
     if (winner === 'O') {
       resultPlayer.textContent = winner;
       resultText.textContent = 'Winner!';
+
+      player0Score++;
+      scores[0].textContent = player0Score;
     } else if (winner === 'X') {
       resultPlayer.textContent = winner;
       resultText.textContent = 'Winner!';
+
+      playerXScore++;
+      scores[1].textContent = playerXScore;
     } else {
       resultPlayer.textContent = 'OX';
       resultText.textContent = 'Draw!';
@@ -270,20 +281,16 @@ const display = (() => {
   result.addEventListener('click', btn);
 
   pubsub.subscribe('endTheGame', endTheGame);
-  pubsub.subscribe('score', score);
   pubsub.subscribe('showComputerChoice', showComputerChoice);
 })();
 
-const board = (() => {
+const game = (() => {
   let board = [
     ['[0][0]', '[0][1]', '[0][2]'],
     ['[1][0]', '[1][1]', '[1][2]'],
     ['[2][0]', '[2][1]', '[2][2]'],
   ];
-
   let winner = '';
-  let player0Score = 0;
-  let playerXScore = 0;
   let stop = 'no';
 
   //Functions
@@ -295,20 +302,21 @@ const board = (() => {
       }
     }
 
-    scanTheBoard();
+    seeBoardForWinner();
 
     if (stop === 'no') {
       pubsub.publish('startComputer', board);
     }
   }
 
-  function setComputetToFirst(tOrF) {
+  function isComputerFirst(tOrF) {
     if (tOrF === true) {
       pubsub.publish('startComputer', board);
     }
   }
 
-  function scanTheBoard() {
+  function seeBoardForWinner(playerTOrF) {
+    winner = '';
     //Horizontal
     if (board[0][0] === board[0][1] && board[0][0] === board[0][2]) {
       if (board[0][0] === 'O') {
@@ -364,23 +372,26 @@ const board = (() => {
       }
     }
 
-    if (winner !== '' || boardIsFilled() === true) {
+    if (winner !== '' || isTheBoardFilled() === true) {
       stop = 'yes';
 
-      if (winner === 'O') {
-        player0Score++;
-      } else if (winner === 'X') {
-        playerXScore++;
+      if (winner === '' && isTheBoardFilled() === true) {
+        winner = 'Draw';
       }
 
-      pubsub.publish('score', [player0Score, playerXScore]);
-      pubsub.publish('endTheGame', winner);
+      if (playerTOrF === true) {
+        setTimeout(() => {
+          pubsub.publish('endTheGame', winner);
+        }, 1000);
+      }
     } else {
       stop = 'no';
     }
+
+    return winner;
   }
 
-  function boardIsFilled() {
+  function isTheBoardFilled() {
     let check = true;
     for (let row = 0; row < board.length; row++) {
       for (let column = 0; column < board[row].length; column++) {
@@ -407,33 +418,54 @@ const board = (() => {
   //Events
   pubsub.subscribe('board', insertXOToBoard);
   pubsub.subscribe('restart', restart);
-  pubsub.subscribe('computerBoardCheck', scanTheBoard);
-  pubsub.subscribe('setComputetToFirst', setComputetToFirst);
+  pubsub.subscribe('seeBoardComputer', seeBoardForWinner);
+  pubsub.subscribe('seeBoardPlayer', seeBoardForWinner);
+  pubsub.subscribe('isComputerFirst', isComputerFirst);
 
-  return board;
+  return seeBoardForWinner;
 })();
 
 const computer = (() => {
-  let type = 'computer';
+  let mode = 'easy';
   let computer = 'X';
+  //MiniMax Variables
+  let isComputerFirst = false;
+  //MiniMax Variables
+  let key = {
+    O: 10,
+    X: -10,
+    Draw: 0,
+  };
 
   //Functions
-  function vs(pOrC) {
-    if (pOrC === 'player') {
-      type = 'player';
+  function vs(value) {
+    if (value === 'player') {
+      mode = 'player';
+    } else if (value === 'easy') {
+      mode = 'easy';
     } else {
-      type = 'computer';
+      mode = 'legendary';
     }
   }
 
-  function changeToO(xOrO) {
+  function xOrOComputer(xOrO) {
     if (xOrO === 'X') {
       computer = 'O';
+    } else {
+      computer = 'X';
     }
   }
 
-  function random(board) {
-    if (type === 'computer') {
+  function setComputerToFirst(tOrF) {
+    if (tOrF === true) {
+      isComputerFirst = true;
+    } else {
+      isComputerFirst = false;
+    }
+  }
+
+  function easy(board) {
+    if (mode === 'easy') {
       for (let row = 0; row < board.length; row++) {
         for (let column = 0; column < board[row].length; column++) {
           if (board[row][column].length > 1) {
@@ -448,7 +480,7 @@ const computer = (() => {
                 board[rows][columns] = computer;
 
                 pubsub.publish('showComputerChoice', [rows, columns]);
-                pubsub.publish('computerBoardCheck', board);
+                pubsub.publish('seeBoardComputer', board);
 
                 return;
               }
@@ -459,10 +491,99 @@ const computer = (() => {
     }
   }
 
+  function legendary(board) {
+    if (mode === 'legendary') {
+      let theTopScore = Infinity;
+      let isNextPlayerMax = true;
+
+      if (isComputerFirst === true) {
+        theTopScore = -Infinity;
+        isNextPlayerMax = false;
+      }
+
+      let choice;
+
+      for (let row = 0; row < board.length; row++) {
+        for (let column = 0; column < board[row].length; column++) {
+          if (board[row][column].length > 1) {
+            board[row][column] = computer;
+
+            let theCurrentScore = templateMiniMax(board, 0, isNextPlayerMax);
+
+            board[row][column] = `[${row}][${column}]`;
+
+            if (isComputerFirst === true) {
+              if (theCurrentScore > theTopScore) {
+                theTopScore = theCurrentScore;
+
+                choice = [row, column];
+              }
+            } else {
+              if (theCurrentScore < theTopScore) {
+                theTopScore = theCurrentScore;
+
+                choice = [row, column];
+              }
+            }
+          }
+        }
+      }
+      board[choice[0]][choice[1]] = computer;
+      pubsub.publish('showComputerChoice', choice);
+      pubsub.publish('seeBoardComputer', board);
+    }
+  }
+
+  function templateMiniMax(board, depth, isNextPlayerMax) {
+    let result = game();
+
+    if (result !== '') {
+      return key[result];
+    }
+
+    if (isNextPlayerMax === true) {
+      return templateLoopForMiniMax(board, depth, false, -Infinity, 'O', 'max');
+    } else {
+      return templateLoopForMiniMax(board, depth, true, Infinity, 'X', 'min');
+    }
+  }
+
+  function templateLoopForMiniMax(
+    board,
+    depth,
+    isNextPlayerMax,
+    theBaselineScore,
+    thePlayer,
+    getMaxOrMin
+  ) {
+    let theTopScore = theBaselineScore;
+
+    for (let row = 0; row < board.length; row++) {
+      for (let column = 0; column < board[row].length; column++) {
+        if (board[row][column].length > 1) {
+          board[row][column] = thePlayer;
+
+          let theCurrentScore = templateMiniMax(
+            board,
+            depth + 1,
+            isNextPlayerMax
+          );
+
+          board[row][column] = `[${row}][${column}]`;
+
+          theTopScore = Math[`${getMaxOrMin}`](theCurrentScore, theTopScore);
+        }
+      }
+    }
+    return theTopScore;
+  }
+
   //Events
   pubsub.subscribe('vs', vs);
-  pubsub.subscribe('startComputer', random);
-  pubsub.subscribe('player', changeToO);
+  pubsub.subscribe('player', xOrOComputer);
+  pubsub.subscribe('setComputerToFirst', setComputerToFirst);
+  pubsub.subscribe('startComputer', easy);
+  pubsub.subscribe('startComputer', legendary);
 })();
 
 //
